@@ -15,12 +15,12 @@ const initDB = async (retries = 5, delay = 5000) => {
       console.log("✓ Database connected successfully");
       
       try {
-        const schemaPath = path.join(__dirname, '../database/schema.sql');
-        const schemaStr = fs.readFileSync(schemaPath, 'utf8');
-        
-        console.log("⏳ Creating tables from schema...");
-        await connection.query(schemaStr);
-        console.log("✓ Database tables created/verified successfully");
+        // Disabled auto-running schema to prevent data deletion
+        // const schemaPath = path.join(__dirname, '../database/schema.sql');
+        // const schemaStr = fs.readFileSync(schemaPath, 'utf8');
+        // console.log("⏳ Creating tables from schema...");
+        // await connection.query(schemaStr);
+        // console.log("✓ Database tables verified");
       } catch (schemaErr) {
         console.error("✗ Error executing schema:", schemaErr.message);
       } finally {
