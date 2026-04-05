@@ -141,6 +141,32 @@ router.delete('/education/:id', profileController.deleteEducation);
  *     tags: [Profile]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - company
+ *               - position
+ *             properties:
+ *               company:
+ *                 type: string
+ *               position:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               startDate:
+ *                 type: string
+ *                 format: date
+ *               endDate:
+ *                 type: string
+ *                 format: date
+ *               isCurrent:
+ *                 type: boolean
+ *               description:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Experience added successfully
@@ -161,6 +187,32 @@ router.post('/experience', experienceValidation, profileController.addExperience
  *         required: true
  *         schema:
  *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - company
+ *               - position
+ *             properties:
+ *               company:
+ *                 type: string
+ *               position:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               startDate:
+ *                 type: string
+ *                 format: date
+ *               endDate:
+ *                 type: string
+ *                 format: date
+ *               isCurrent:
+ *                 type: boolean
+ *               description:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Experience updated successfully

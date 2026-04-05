@@ -6,8 +6,8 @@ module.exports = {
   
   db: {
     host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
+    user: process.env.MYSQL_ROOT_USER || 'root',
+    password: process.env.MYSQL_ROOT_PASSWORD || '',
     database: process.env.DB_NAME || 'alumni_platform',
     port: process.env.DB_PORT || 3306,
     waitForConnections: true,

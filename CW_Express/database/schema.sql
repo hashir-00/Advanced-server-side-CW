@@ -182,7 +182,6 @@ CREATE TABLE daily_winners (
 -- ============================================================
 
 -- Function to count monthly wins for a user
-DELIMITER //
 CREATE FUNCTION count_monthly_wins(p_user_id INT, p_year INT, p_month INT)
 RETURNS INT
 DETERMINISTIC
@@ -197,11 +196,9 @@ BEGIN
     AND MONTH(winner_date) = p_month;
     
     RETURN win_count;
-END//
-DELIMITER ;
+END;
 
 -- Function to check if user attended any event in a given month
-DELIMITER //
 CREATE FUNCTION attended_event_in_month(p_user_id INT, p_year INT, p_month INT)
 RETURNS BOOLEAN
 DETERMINISTIC
@@ -217,11 +214,9 @@ BEGIN
     AND MONTH(e.event_date) = p_month;
     
     RETURN has_attended;
-END//
-DELIMITER ;
+END;
 
 -- Function to get monthly win limit for a user
-DELIMITER //
 CREATE FUNCTION get_monthly_limit(p_user_id INT, p_year INT, p_month INT)
 RETURNS INT
 DETERMINISTIC
@@ -238,22 +233,19 @@ BEGIN
     ELSE
         RETURN base_limit; -- 3 wins otherwise
     END IF;
-END//
-DELIMITER ;
+END;
 
 -- ============================================================
 -- TRIGGERS
 -- ============================================================
 
 -- Trigger to automatically create profile when user is created
-DELIMITER //
 CREATE TRIGGER after_user_insert
 AFTER INSERT ON users
 FOR EACH ROW
 BEGIN
     INSERT INTO profiles (user_id) VALUES (NEW.user_id);
-END//
-DELIMITER ;
+END;
 
 -- ============================================================
 -- SAMPLE DATA (Optional - for testing)

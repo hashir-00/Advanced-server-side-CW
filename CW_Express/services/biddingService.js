@@ -42,8 +42,19 @@ const getMonthlyLimit = async (userId, year, month) => {
  */
 const checkEligibility = async (userId, targetDate) => {
   const date = new Date(targetDate);
+  
+  if (isNaN(date.getTime())) {
+    return {
+      eligible: false,
+      reason: 'Invalid date format provided',
+      winsThisMonth: 0,
+      limit: 0
+    };
+  }
+
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
+  const formattedDate = date.toISOString().split('T')[0];
   
   const winsThisMonth = await getMonthlyWins(userId, year, month);
   const limit = await getMonthlyLimit(userId, year, month);
@@ -61,7 +72,7 @@ const checkEligibility = async (userId, targetDate) => {
   const [existingBids] = await db.query(
     `SELECT bid_id FROM bids 
      WHERE user_id = ? AND target_date = ? AND status = 'active'`,
-    [userId, targetDate]
+    [userId, formattedDate]
   );
   
   if (existingBids.length > 0) {
@@ -76,7 +87,7 @@ const checkEligibility = async (userId, targetDate) => {
   // Check if this date already has a winner
   const [winners] = await db.query(
     'SELECT winner_id FROM daily_winners WHERE winner_date = ?',
-    [targetDate]
+    [formattedDate]
   );
   
   if (winners.length > 0) {

@@ -1,7 +1,5 @@
 module.exports.register = async (request, response, next) => {
     try {
-
-    // Write your logic here        
         return response.json({
             status: true,
             message: "You have registered as an admin successfully",
