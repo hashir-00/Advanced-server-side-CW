@@ -43,7 +43,13 @@ export const authService = {
 
 export const profileService = {
   getProfile: () => api.get('/profile'),
-  updateProfile: (data) => api.put('/profile', data)
+  updateProfile: (data) => api.put('/profile', data),
+  addEducation: (data) => api.post('/profile/education', data),
+  updateEducation: (id, data) => api.put(`/profile/education/${id}`, data),
+  deleteEducation: (id) => api.delete(`/profile/education/${id}`),
+  addExperience: (data) => api.post('/profile/experience', data),
+  updateExperience: (id, data) => api.put(`/profile/experience/${id}`, data),
+  deleteExperience: (id) => api.delete(`/profile/experience/${id}`)
 };
 
 export const biddingService = {

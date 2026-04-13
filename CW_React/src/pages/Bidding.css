@@ -1,0 +1,156 @@
+.bidding-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.bidding-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.bid-toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+.bid-toast.error { background: rgba(239,68,68,0.1); color: var(--danger-color); }
+.bid-toast.success { background: rgba(16,185,129,0.1); color: var(--secondary-color); }
+
+.bidding-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.bid-card {
+  background: var(--surface-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 28px;
+}
+
+.bid-card h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.eligibility-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.elig-stat {
+  flex: 1;
+  text-align: center;
+  padding: 16px;
+  background: rgba(79,70,229,0.06);
+  border-radius: 10px;
+}
+
+.elig-label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.elig-value {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.elig-value.highlight {
+  color: var(--secondary-color);
+}
+
+.bid-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bids-table-card {
+  overflow: hidden;
+}
+
+.bids-table-wrapper {
+  overflow-x: auto;
+}
+
+.bids-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bids-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.bids-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.bids-table tbody tr:hover {
+  background: rgba(79,70,229,0.04);
+}
+
+.bid-amount {
+  font-weight: 600;
+  color: var(--secondary-color);
+}
+
+.badge-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.badge-status.active { background: rgba(16,185,129,0.12); color: var(--secondary-color); }
+.badge-status.won { background: rgba(245,158,11,0.12); color: var(--warning-color); }
+.badge-status.lost { background: rgba(239,68,68,0.12); color: var(--danger-color); }
+
+.increase-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.increase-form .form-control {
+  width: 100px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+.empty-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .bidding-grid {
+    grid-template-columns: 1fr;
+  }
+  .eligibility-stats {
+    flex-direction: column;
+  }
+}

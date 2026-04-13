@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, BarChart3, Settings, Menu, LogOut, Bell } from 'lucide-react';
+import { LayoutDashboard, Users, BarChart3, User, Gavel, Menu, LogOut, Bell } from 'lucide-react';
 import { authService } from '../../services/api';
 import './Layout.css';
 
@@ -38,9 +38,13 @@ const Layout = () => {
             <Users size={20} />
             <span>Alumni Directory</span>
           </NavLink>
-          <NavLink to="/settings" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'} onClick={() => setSidebarOpen(false)}>
-            <Settings size={20} />
-            <span>Settings</span>
+          <NavLink to="/profile" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'} onClick={() => setSidebarOpen(false)}>
+            <User size={20} />
+            <span>My Profile</span>
+          </NavLink>
+          <NavLink to="/bidding" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'} onClick={() => setSidebarOpen(false)}>
+            <Gavel size={20} />
+            <span>Bidding</span>
           </NavLink>
         </nav>
       </aside>

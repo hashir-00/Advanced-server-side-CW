@@ -1,7 +1,9 @@
 const db = require('../config/dbConfig');
 const fs = require('fs');
+const logger = require('../utils/logger');
 
 const getProfile = async (req, res) => {
+  logger.controller.info('profileController.getProfile', 'Get profile attempt', req.user.userId);
   try {
     const userId = req.user.userId;
     const [profiles] = await db.query(`SELECT u.user_id, u.email, u.first_name, u.last_name, u.role, u.created_at, p.linkedin_url, p.bio, p.profile_image_path FROM users u LEFT JOIN profiles p ON u.user_id = p.user_id WHERE u.user_id = ?`, [userId]);
@@ -13,12 +15,13 @@ const getProfile = async (req, res) => {
     const [experience] = await db.query(`SELECT experience_id, company, position, location, start_date, end_date, is_current, description FROM experience WHERE user_id = ? ORDER BY start_date DESC`, [userId]);
     res.status(200).json({ success: true, data: { ...profile, education, experience } });
   } catch (error) {
-    console.error('Get profile error:', error);
+    logger.controller.error('profileController.getProfile', 'Get profile error', error);
     res.status(500).json({ success: false, message: 'An error occurred while fetching profile' });
   }
 };
 
 const updateProfile = async (req, res) => {
+  logger.controller.info('profileController.updateProfile', 'Update profile attempt', req.user.userId);
   try {
     const userId = req.user.userId;
     const { linkedinUrl, bio } = req.body;
@@ -40,26 +43,30 @@ const updateProfile = async (req, res) => {
       updateValues.push(userId);
       await db.query(`UPDATE profiles SET ${updateFields.join(', ')} WHERE user_id = ?`, updateValues);
     }
+    logger.controller.info('profileController.updateProfile', 'Profile updated successfully');
     res.status(200).json({ success: true, message: 'Profile updated successfully' });
   } catch (error) {
-    console.error('Update profile error:', error);
+    logger.controller.error('profileController.updateProfile', 'Update profile error', error);
     res.status(500).json({ success: false, message: 'An error occurred while updating profile' });
   }
 };
 
 const addEducation = async (req, res) => {
+  logger.controller.info('profileController.addEducation', 'Add education attempt', req.user.userId);
   try {
     const userId = req.user.userId;
     const { institution, degree, fieldOfStudy, startDate, endDate, description } = req.body;
     const [result] = await db.query(`INSERT INTO education (user_id, institution, degree, field_of_study, start_date, end_date, description) VALUES (?, ?, ?, ?, ?, ?, ?)`, [userId, institution, degree, fieldOfStudy, startDate, endDate, description]);
+    logger.controller.info('profileController.addEducation', 'Education added successfully');
     res.status(201).json({ success: true, message: 'Education added successfully', data: { educationId: result.insertId } });
   } catch (error) {
-    console.error('Add education error:', error);
+    logger.controller.error('profileController.addEducation', 'Add education error', error);
     res.status(500).json({ success: false, message: 'An error occurred while adding education' });
   }
 };
 
 const updateEducation = async (req, res) => {
+  logger.controller.info('profileController.updateEducation', 'Update education attempt', req.params.id);
   try {
     const userId = req.user.userId;
     const educationId = req.params.id;
@@ -68,14 +75,16 @@ const updateEducation = async (req, res) => {
     if (education.length === 0) return res.status(404).json({ success: false, message: 'Education record not found' });
     if (education[0].user_id !== userId) return res.status(403).json({ success: false, message: 'Access denied' });
     await db.query(`UPDATE education SET institution = ?, degree = ?, field_of_study = ?, start_date = ?, end_date = ?, description = ? WHERE education_id = ?`, [institution, degree, fieldOfStudy, startDate, endDate, description, educationId]);
+    logger.controller.info('profileController.updateEducation', 'Education updated successfully');
     res.status(200).json({ success: true, message: 'Education updated successfully' });
   } catch (error) {
-    console.error('Update education error:', error);
+    logger.controller.error('profileController.updateEducation', 'Update education error', error);
     res.status(500).json({ success: false, message: 'An error occurred while updating education' });
   }
 };
 
 const deleteEducation = async (req, res) => {
+  logger.controller.info('profileController.deleteEducation', 'Delete education attempt', req.params.id);
   try {
     const userId = req.user.userId;
     const educationId = req.params.id;
@@ -83,26 +92,30 @@ const deleteEducation = async (req, res) => {
     if (education.length === 0) return res.status(404).json({ success: false, message: 'Education record not found' });
     if (education[0].user_id !== userId) return res.status(403).json({ success: false, message: 'Access denied' });
     await db.query('DELETE FROM education WHERE education_id = ?', [educationId]);
+    logger.controller.info('profileController.deleteEducation', 'Education deleted successfully');
     res.status(200).json({ success: true, message: 'Education deleted successfully' });
   } catch (error) {
-    console.error('Delete education error:', error);
+    logger.controller.error('profileController.deleteEducation', 'Delete education error', error);
     res.status(500).json({ success: false, message: 'An error occurred while deleting education' });
   }
 };
 
 const addExperience = async (req, res) => {
+  logger.controller.info('profileController.addExperience', 'Add experience attempt', req.user.userId);
   try {
     const userId = req.user.userId;
     const { company, position, location, startDate, endDate, isCurrent, description } = req.body;
     const [result] = await db.query(`INSERT INTO experience (user_id, company, position, location, start_date, end_date, is_current, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [userId, company, position, location, startDate, endDate, isCurrent || false, description]);
+    logger.controller.info('profileController.addExperience', 'Experience added successfully');
     res.status(201).json({ success: true, message: 'Experience added successfully', data: { experienceId: result.insertId } });
   } catch (error) {
-    console.error('Add experience error:', error);
+    logger.controller.error('profileController.addExperience', 'Add experience error', error);
     res.status(500).json({ success: false, message: 'An error occurred while adding experience' });
   }
 };
 
 const updateExperience = async (req, res) => {
+  logger.controller.info('profileController.updateExperience', 'Update experience attempt', req.params.id);
   try {
     const userId = req.user.userId;
     const experienceId = req.params.id;
@@ -111,14 +124,16 @@ const updateExperience = async (req, res) => {
     if (experience.length === 0) return res.status(404).json({ success: false, message: 'Experience record not found' });
     if (experience[0].user_id !== userId) return res.status(403).json({ success: false, message: 'Access denied' });
     await db.query(`UPDATE experience SET company = ?, position = ?, location = ?, start_date = ?, end_date = ?, is_current = ?, description = ? WHERE experience_id = ?`, [company, position, location, startDate, endDate, isCurrent || false, description, experienceId]);
+    logger.controller.info('profileController.updateExperience', 'Experience updated successfully');
     res.status(200).json({ success: true, message: 'Experience updated successfully' });
   } catch (error) {
-    console.error('Update experience error:', error);
+    logger.controller.error('profileController.updateExperience', 'Update experience error', error);
     res.status(500).json({ success: false, message: 'An error occurred while updating experience' });
   }
 };
 
 const deleteExperience = async (req, res) => {
+  logger.controller.info('profileController.deleteExperience', 'Delete experience attempt', req.params.id);
   try {
     const userId = req.user.userId;
     const experienceId = req.params.id;
@@ -126,9 +141,10 @@ const deleteExperience = async (req, res) => {
     if (experience.length === 0) return res.status(404).json({ success: false, message: 'Experience record not found' });
     if (experience[0].user_id !== userId) return res.status(403).json({ success: false, message: 'Access denied' });
     await db.query('DELETE FROM experience WHERE experience_id = ?', [experienceId]);
+    logger.controller.info('profileController.deleteExperience', 'Experience deleted successfully');
     res.status(200).json({ success: false, message: 'Experience deleted successfully' });
   } catch (error) {
-    console.error('Delete experience error:', error);
+    logger.controller.error('profileController.deleteExperience', 'Delete experience error', error);
     res.status(500).json({ success: false, message: 'An error occurred while deleting experience' });
   }
 };

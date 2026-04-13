@@ -2,6 +2,7 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const config = require('../config/config');
 const db = require('../config/dbConfig');
+const logger = require('../utils/logger');
 
 /**
  * Email service for sending verification emails
@@ -13,9 +14,9 @@ const transporter = nodemailer.createTransport(config.email);
 // Verify transporter configuration
 transporter.verify((error, success) => {
   if (error) {
-    console.error('✗ Email service configuration error:', error.message);
+    logger.service.error('emailService.init', 'Email service configuration error', error);
   } else {
-    console.log('✓ Email service is ready');
+    logger.service.info('emailService.init', 'Email service is ready');
   }
 });
 
@@ -38,12 +39,14 @@ const createVerificationToken = async (userId) => {
   expiresAt.setHours(expiresAt.getHours() + config.tokenExpiryHours);
   
   // Delete any existing tokens for this user
+  logger.repo.info('emailService.createVerificationToken', 'Deleting existing tokens', userId);
   await db.query(
     'DELETE FROM email_verification_tokens WHERE user_id = ?',
     [userId]
   );
   
   // Insert new token
+  logger.repo.info('emailService.createVerificationToken', 'Inserting new token', userId);
   await db.query(
     'INSERT INTO email_verification_tokens (user_id, token, expires_at) VALUES (?, ?, ?)',
     [userId, token, expiresAt]
@@ -58,6 +61,8 @@ const createVerificationToken = async (userId) => {
  * @returns {Promise<number|null>} User ID if valid, null otherwise
  */
 const verifyToken = async (token) => {
+  logger.service.info('emailService.verifyToken', 'Verifying token');
+  logger.repo.info('emailService.verifyToken', 'Querying token');
   const [tokens] = await db.query(
     `SELECT user_id, expires_at FROM email_verification_tokens 
      WHERE token = ? AND expires_at > NOW()`,
@@ -124,10 +129,11 @@ const sendVerificationEmail = async (email, token, firstName) => {
   };
   
   try {
+    logger.service.info('emailService.sendVerificationEmail', 'Sending verification email to', email);
     await transporter.sendMail(mailOptions);
-    console.log(`✓ Verification email sent to ${email}`);
+    logger.service.info('emailService.sendVerificationEmail', 'Verification email sent successfully', email);
   } catch (error) {
-    console.error('✗ Error sending verification email:', error);
+    logger.service.error('emailService.sendVerificationEmail', 'Error sending verification email', error);
     throw new Error('Failed to send verification email');
   }
 };
@@ -183,10 +189,11 @@ const sendWinnerNotification = async (email, firstName, date, bidAmount) => {
   };
   
   try {
+    logger.service.info('emailService.sendWinnerNotification', 'Sending winner notification to', email);
     await transporter.sendMail(mailOptions);
-    console.log(`✓ Winner notification sent to ${email}`);
+    logger.service.info('emailService.sendWinnerNotification', 'Winner notification sent successfully', email);
   } catch (error) {
-    console.error('✗ Error sending winner notification:', error);
+    logger.service.error('emailService.sendWinnerNotification', 'Error sending winner notification', error);
   }
 };
 

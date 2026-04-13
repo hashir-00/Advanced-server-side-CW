@@ -1,8 +1,11 @@
 const dbPool = require('../config/dbConfig');
+const logger = require('../utils/logger');
 
 const analyticsController = {
   getDashboardStats: async (req, res, next) => {
+    logger.controller.info('analyticsController.getDashboardStats', 'Fetching dashboard stats');
     try {
+      logger.repo.info('analyticsController.getDashboardStats', 'Executing queries for dashboard stats');
       const [[alumniRow]] = await dbPool.execute('SELECT COUNT(*) as total FROM users');
       const [[bidsRow]] = await dbPool.execute("SELECT COUNT(*) as total FROM bids WHERE status = 'active'");
 
@@ -14,6 +17,7 @@ const analyticsController = {
 
       const [[eventsRow]] = await dbPool.execute('SELECT COUNT(*) as total FROM events');
 
+      logger.controller.info('analyticsController.getDashboardStats', 'Successfully fetched dashboard stats');
       res.json({
         success: true,
         data: {
@@ -24,12 +28,15 @@ const analyticsController = {
         }
       });
     } catch (error) {
+      logger.controller.error('analyticsController.getDashboardStats', 'Error fetching dashboard stats', error);
       next(error);
     }
   },
 
   getDashboardData: async (req, res, next) => {
+    logger.controller.info('analyticsController.getDashboardData', 'Fetching dashboard charts data');
     try {
+      logger.repo.info('analyticsController.getDashboardData', 'Executing queries for dashboard charts');
       let employers = [];
       try {
         const [rows] = await dbPool.execute(
@@ -104,6 +111,7 @@ const analyticsController = {
         ];
       }
 
+      logger.controller.info('analyticsController.getDashboardData', 'Successfully returned dashboard charts data');
       res.json({
         success: true,
         data: {

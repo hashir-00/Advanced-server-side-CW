@@ -1,8 +1,11 @@
 const dbPool = require('../config/dbConfig');
+const logger = require('../utils/logger');
 
 const alumniController = {
   getAllAlumni: async (req, res, next) => {
+    logger.controller.info('alumniController.getAllAlumni', 'Fetching alumni directory');
     try {
+      logger.repo.info('alumniController.getAllAlumni', 'Executing query to fetch verified alumni');
       const [alumniRows] = await dbPool.execute(`
         SELECT 
           u.user_id, u.first_name, u.last_name, u.email,
@@ -18,10 +21,12 @@ const alumniController = {
       let expData = [];
       
       if (userIds.length > 0) {
+        logger.repo.info('alumniController.getAllAlumni', `Fetching skills for ${userIds.length} users`);
         const placeholders = userIds.map(() => '?').join(',');
         const [skills] = await dbPool.execute(`SELECT user_id, skill_name, proficiency FROM skills WHERE user_id IN (${placeholders})`, userIds);
         skillsData = skills;
 
+        logger.repo.info('alumniController.getAllAlumni', `Fetching current experience for ${userIds.length} users`);
         const [experiences] = await dbPool.execute(`SELECT user_id, company, position, is_current FROM experience WHERE user_id IN (${placeholders}) AND is_current = TRUE`, userIds);
         expData = experiences;
       }
@@ -32,12 +37,13 @@ const alumniController = {
         currentExperience: expData.find(e => e.user_id === alumnus.user_id) || null
       }));
 
+      logger.controller.info('alumniController.getAllAlumni', `Successfully fetched ${formattedAlumni.length} alumni`);
       res.status(200).json({
         success: true,
         data: formattedAlumni
       });
     } catch (error) {
-      console.error('Alumni directory error:', error);
+      logger.controller.error('alumniController.getAllAlumni', 'Failed to fetch alumni directory', error);
       res.status(500).json({ success: false, message: 'Failed to fetch alumni directory' });
     }
   }

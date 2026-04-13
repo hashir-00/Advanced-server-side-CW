@@ -1,4 +1,5 @@
 const db = require('../config/dbConfig');
+const logger = require('../utils/logger');
 
 /**
  * Bidding Service - Business logic for blind bidding system
@@ -12,6 +13,7 @@ const db = require('../config/dbConfig');
  * @returns {Promise<number>} Number of wins
  */
 const getMonthlyWins = async (userId, year, month) => {
+  logger.repo.info('biddingService.getMonthlyWins', 'Querying monthly wins', { userId, year, month });
   const [result] = await db.query(
     'SELECT count_monthly_wins(?, ?, ?) as win_count',
     [userId, year, month]
@@ -27,6 +29,7 @@ const getMonthlyWins = async (userId, year, month) => {
  * @returns {Promise<number>} Win limit
  */
 const getMonthlyLimit = async (userId, year, month) => {
+  logger.repo.info('biddingService.getMonthlyLimit', 'Querying monthly limit', { userId, year, month });
   const [result] = await db.query(
     'SELECT get_monthly_limit(?, ?, ?) as win_limit',
     [userId, year, month]
@@ -41,6 +44,7 @@ const getMonthlyLimit = async (userId, year, month) => {
  * @returns {Promise<{eligible: boolean, reason: string, winsThisMonth: number, limit: number}>}
  */
 const checkEligibility = async (userId, targetDate) => {
+  logger.service.info('biddingService.checkEligibility', 'Checking bid eligibility for date', { userId, targetDate });
   const date = new Date(targetDate);
   
   if (isNaN(date.getTime())) {
@@ -69,6 +73,7 @@ const checkEligibility = async (userId, targetDate) => {
   }
   
   // Check if user already has an active bid for this date
+  logger.repo.info('biddingService.checkEligibility', 'Querying existing bids for date', { userId, formattedDate });
   const [existingBids] = await db.query(
     `SELECT bid_id FROM bids 
      WHERE user_id = ? AND target_date = ? AND status = 'active'`,
@@ -113,6 +118,7 @@ const checkEligibility = async (userId, targetDate) => {
  * @returns {Promise<Array>} User's bids
  */
 const getUserBids = async (userId) => {
+  logger.repo.info('biddingService.getUserBids', 'Querying user bids', userId);
   const [bids] = await db.query(
     `SELECT bid_id, bid_amount, target_date, status, created_at, updated_at
      FROM bids
@@ -130,6 +136,7 @@ const getUserBids = async (userId) => {
  * @returns {Promise<boolean>}
  */
 const isUserBidOwner = async (bidId, userId) => {
+  logger.repo.info('biddingService.isUserBidOwner', 'Checking bid ownership', { bidId, userId });
   const [bids] = await db.query(
     'SELECT user_id FROM bids WHERE bid_id = ?',
     [bidId]
