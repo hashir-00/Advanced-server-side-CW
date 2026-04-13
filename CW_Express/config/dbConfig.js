@@ -3,30 +3,27 @@ const mysql = require("mysql2/promise");
 const fs = require("fs");
 const path = require("path");
 
-// Ensure multipleStatements is enabled to run the entire schema file
 const dbOptions = { ...config.db, multipleStatements: true };
 const pool = mysql.createPool(dbOptions);
 
-// Test the connection and initialize schema gracefully
 const initDB = async (retries = 5, delay = 5000) => {
   while (retries > 0) {
     try {
       const connection = await pool.getConnection();
       console.log("✓ Database connected successfully");
-      
+
       try {
-        // Disabled auto-running schema to prevent data deletion
-        // const schemaPath = path.join(__dirname, '../database/schema.sql');
-        // const schemaStr = fs.readFileSync(schemaPath, 'utf8');
-        // console.log("⏳ Creating tables from schema...");
-        // await connection.query(schemaStr);
-        // console.log("✓ Database tables verified");
+        const schemaPath = path.join(__dirname, '../database/schema.sql');
+        const schemaStr = fs.readFileSync(schemaPath, 'utf8');
+        console.log("⏳ Running schema and seeding mock data...");
+        await connection.query(schemaStr);
+        console.log("✓ Database tables verified and mock data seeded");
       } catch (schemaErr) {
         console.error("✗ Error executing schema:", schemaErr.message);
       } finally {
         connection.release();
       }
-      return; // Exit the loop on success
+      return;
     } catch (err) {
       retries -= 1;
       console.error(`✗ Error connecting to the database. Retries left: ${retries}`);
@@ -41,6 +38,8 @@ const initDB = async (retries = 5, delay = 5000) => {
   }
 };
 
-initDB();
+const ready = initDB();
+
+pool.ready = ready;
 
 module.exports = pool;

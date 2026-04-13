@@ -27,6 +27,12 @@ const options = {
           scheme: 'bearer',
           bearerFormat: 'JWT',
           description: 'Enter your JWT token'
+        },
+        ApiKeyAuth: {
+          type: 'apiKey',
+          in: 'header',
+          name: 'X-API-Key',
+          description: 'API Key scoped for analytics'
         }
       },
       schemas: {

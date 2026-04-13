@@ -1,290 +1,244 @@
-# Alumni Influencer Platform API
+# University Alumni Intelligence Dashboard
 
-A comprehensive web-based API for an alumni influencer platform with blind bidding system, built using Node.js (Express) and MySQL.
+A full-stack university alumni management and intelligence platform. Features a blind bidding system for "Alumni of the Day," a live analytics dashboard with interactive charts, a searchable alumni directory, granular API key access control, and automated daily winner selection.
 
-## Features
+---
 
-### 🔐 Authentication & Security
-- User registration with university domain validation
-- Email verification with secure, expiring tokens
-- Bcrypt password hashing (10 rounds)
-- JWT Bearer token authentication
-- Session management
-- Helmet.js for security headers
-- CORS configuration
-- Rate limiting (100 requests per 15 minutes, stricter for auth endpoints)
-- Input validation and sanitization (SQL injection & XSS prevention)
+## Tech Stack
 
-### 👤 Profile Management
-- Complete user profiles with LinkedIn URL, bio, and profile image
-- Education history (degrees, institutions, courses)
-- Experience history (employment records)
-- File upload for profile images
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | React 18, Vite, Vanilla CSS, Chart.js |
+| **Backend** | Node.js, Express 5, MySQL 2 |
+| **Auth** | JWT (Bearer tokens), bcrypt (10 rounds), express-session |
+| **Security** | Helmet.js, CORS, express-rate-limit, express-validator |
+| **Database** | MySQL 8 (3NF schema) |
+| **Docs** | Swagger / OpenAPI 3.0 |
+| **Jobs** | node-cron (daily midnight job) |
+| **Email** | Nodemailer (Gmail SMTP) |
 
-### 💰 Blind Bidding System
-- Place bids for "Alumni of the Day" feature
-- Increase bids without seeing competitors' bids (blind bidding)
-- Monthly win limits (3 wins default, 4 if event attended)
-- Automatic eligibility checking
-- View only your own bid history
+---
 
-### ⏰ Automated Winner Selection
-- Daily cron job runs at midnight
-- Selects highest bidder for next day
-- Automatic email notifications to winners
-- Transaction-safe bid status updates
+## Repository Structure
 
-### 📚 API Documentation
-- Swagger/OpenAPI documentation at `/api-docs`
-- Interactive API testing interface
-
-## Prerequisites
-
-- Node.js (v14 or higher)
-- MySQL (v5.7 or higher)
-- npm or yarn
-
-## Installation
-
-1. **Clone the repository**
-   ```bash
-   cd "g:\Final Year\LECS\Serverside\CW_1\CW_Express"
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure environment variables**
-   
-   Edit the `.env` file with your configuration:
-   ```env
-   # Database
-   DB_HOST=localhost
-   DB_USER=root
-   DB_PASSWORD=your_password
-   DB_NAME=alumni_platform
-   
-   # Email (for verification)
-   EMAIL_USER=your_email@gmail.com
-   EMAIL_PASSWORD=your_app_password
-   
-   # University domain
-   ALLOWED_DOMAINS=university.edu,alumni.university.edu
-   ```
-
-4. **Create the database**
-   ```bash
-   mysql -u root -p
-   ```
-   
-   Then run:
-   ```sql
-   CREATE DATABASE alumni_platform;
-   ```
-
-5. **Import the database schema**
-   ```bash
-   mysql -u root -p alumni_platform < database/schema.sql
-   ```
-
-## Running the Application
-
-### Development Mode
-```bash
-npm run dev
+```
+CW_1/
+├── CW_Express/          # Node.js / Express REST API
+│   ├── config/          # DB pool, app config
+│   ├── controllers/     # Route handlers
+│   ├── middleware/      # Auth, security, validation, API key
+│   ├── routes/          # Express routers
+│   ├── services/        # Email, bidding business logic
+│   ├── jobs/            # Cron winner-selection job
+│   ├── swagger/         # OpenAPI spec config
+│   ├── database/
+│   │   └── schema.sql   # 3NF schema + mock data seed
+│   └── index.js         # Server entry point
+│
+├── CW_React/            # React + Vite SPA
+│   ├── src/
+│   │   ├── components/  # Layout, PrivateRoute
+│   │   ├── pages/       # Dashboard, Analytics, AlumniDirectory, Auth
+│   │   ├── services/    # Axios API layer
+│   │   └── utils/       # CSV / PDF / PNG export
+│   └── index.html
+│
+├── cw_express.md        # Backend README
+├── cw_react.md          # Frontend README
+└── README.md            # This file
 ```
 
-### Production Mode
+---
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js v16+
+- MySQL 8 server running locally
+- npm
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-username/alumni-intelligence-dashboard.git
+cd alumni-intelligence-dashboard
+```
+
+### 2. Set up the Backend
+
+```bash
+cd CW_Express
+npm install
+```
+
+Copy and configure environment variables:
+```bash
+cp .env.example .env
+```
+
+Edit `.env`:
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_NAME=alumni_platform
+
+JWT_SECRET=your_jwt_secret_key
+JWT_EXPIRES_IN=24h
+
+SESSION_SECRET=your_session_secret
+
+EMAIL_USER=your_gmail@gmail.com
+EMAIL_PASSWORD=your_gmail_app_password
+
+CORS_ORIGIN=http://localhost:5173
+PORT=3000
+NODE_ENV=development
+```
+
+Create the MySQL database:
+```sql
+CREATE DATABASE alumni_platform;
+```
+
+Start the backend — the schema and mock data are seeded automatically on first boot:
 ```bash
 npm start
 ```
 
-The server will start on `http://localhost:3000`
+> ✅ You should see: `✓ Database tables verified and mock data seeded`
 
-## API Documentation
+### 3. Set up the Frontend
 
-Once the server is running, visit:
-```
-http://localhost:3000/api-docs
-```
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `GET /api/auth/verify/:token` - Verify email
-- `POST /api/auth/login` - Login
-- `POST /api/auth/logout` - Logout
-- `POST /api/auth/resend-verification` - Resend verification email
-
-### Profile (Requires Authentication)
-- `GET /api/profile` - Get user profile
-- `PUT /api/profile` - Update profile
-- `POST /api/profile/education` - Add education
-- `PUT /api/profile/education/:id` - Update education
-- `DELETE /api/profile/education/:id` - Delete education
-- `POST /api/profile/experience` - Add experience
-- `PUT /api/profile/experience/:id` - Update experience
-- `DELETE /api/profile/experience/:id` - Delete experience
-
-### Bidding (Requires Authentication)
-- `POST /api/bidding/place` - Place a bid
-- `PUT /api/bidding/increase/:bidId` - Increase bid
-- `GET /api/bidding/my-bids` - Get your bids
-- `GET /api/bidding/eligibility` - Check eligibility
-
-## Database Schema
-
-The database follows Third Normal Form (3NF) with the following tables:
-
-- **users** - User authentication and core data
-- **profiles** - Alumni profile information (1:1 with users)
-- **education** - Educational background (1:N with users)
-- **experience** - Employment history (1:N with users)
-- **bids** - Blind bidding records
-- **daily_winners** - Alumni of the Day winners
-- **events** - Event information
-- **event_attendance** - User-event attendance tracking
-- **email_verification_tokens** - Secure verification tokens
-- **sessions** - Session management
-
-### Stored Procedures
-- `count_monthly_wins()` - Count wins for a user in a month
-- `attended_event_in_month()` - Check event attendance
-- `get_monthly_limit()` - Get monthly win limit (3 or 4)
-
-## Testing
-
-### Automated Smoke Test
 ```bash
-npm test
+cd ../CW_React
+npm install
+cp .env.example .env
 ```
 
-This verifies core project wiring (API route mounting, session store configuration, winner job initialization, and schema presence) without requiring a running database.
+The default `.env` is:
+```env
+VITE_API_URL=http://localhost:3000/api
+```
 
-### Manual Testing with Swagger
-1. Start the server
-2. Navigate to `http://localhost:3000/api-docs`
-3. Test endpoints directly from the Swagger UI
-
-### Example API Calls
-
-**Register a user:**
+Start the frontend:
 ```bash
-curl -X POST http://localhost:3000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "john.doe@university.edu",
-    "password": "SecurePass123!",
-    "firstName": "John",
-    "lastName": "Doe"
-  }'
+npm run dev
 ```
 
-**Login:**
-```bash
-curl -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "john.doe@university.edu",
-    "password": "SecurePass123!"
-  }'
-```
+### 4. Open the app
 
-**Place a bid (with token):**
-```bash
-curl -X POST http://localhost:3000/api/bidding/place \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{
-    "amount": 100,
-    "targetDate": "2026-02-20"
-  }'
-```
+Navigate to **http://localhost:5173**
 
-## Security Features
+You'll be redirected to `/login`. Use one of the mock accounts seeded automatically:
 
-### Password Requirements
-- Minimum 8 characters
-- At least one uppercase letter
-- At least one lowercase letter
-- At least one number
-- At least one special character
+| Email | Password |
+|-------|---------|
+| `jdoe@university.edu` | `Admin123!` |
+| `asmith@university.edu` | `Admin123!` |
+| `mjohnson@university.edu` | `Admin123!` |
+| `ewilliams@university.edu` | `Admin123!` |
+| `drown@university.edu` | `Admin123!` |
 
-### Email Verification
-- Tokens expire after 24 hours
-- Secure random token generation
-- One-time use tokens
+Or register a new account using a `@university.edu` email — you'll receive a verification email.
 
-### Rate Limiting
-- General API: 100 requests per 15 minutes
-- Authentication endpoints: 5 requests per 15 minutes
+---
 
-### Headers (Helmet.js)
-- Content Security Policy
-- X-Content-Type-Options
-- X-Frame-Options
-- Strict-Transport-Security
+## Features
 
-## Project Structure
+### 🔐 Authentication & Security
+- University domain email restriction (`@university.edu`)
+- Email verification with expiring tokens
+- bcrypt password hashing (10 salt rounds)
+- JWT Bearer token auth + session management
+- Helmet.js security headers, CORS, rate limiting
+- Input sanitisation against XSS and SQL injection
 
-```
-CW_Express/
-├── config/
-│   ├── config.js          # Configuration loader
-│   └── dbConfig.js        # Database connection pool
-├── controllers/
-│   ├── authController.js  # Authentication logic
-│   ├── profileController.js # Profile management
-│   └── biddingController.js # Bidding logic
-├── middleware/
-│   ├── auth.js            # JWT authentication
-│   ├── security.js        # Helmet, CORS, rate limiting
-│   ├── validator.js       # Input validation
-│   └── upload.js          # File upload handling
-├── services/
-│   ├── emailService.js    # Email sending
-│   └── biddingService.js  # Bidding business logic
-├── routes/
-│   ├── auth.js            # Auth routes
-│   ├── profile.js         # Profile routes
-│   └── bidding.js         # Bidding routes
-├── jobs/
-│   └── winnerSelection.js # Daily winner selection cron
-├── swagger/
-│   └── swagger.js         # API documentation config
-├── database/
-│   └── schema.sql         # Database schema
-├── uploads/
-│   └── profiles/          # Profile images
-├── .env                   # Environment variables
-├── index.js               # Main server file
-└── package.json           # Dependencies
+### 📊 Analytics Dashboard
+- Live stat cards: Alumni count, Active Bids, Total Donations, Events Hosted
+- 6 interactive charts: Top Employers (Bar), Registration Trends (Line), Skills Distribution (Doughnut), Geographic Distribution (Pie), Skills Gap (Radar), Bid Volume (Bar)
+- Export data as CSV or PDF
+- Download individual charts as PNG
 
-```
+### 👥 Alumni Directory
+- Searchable grid of all verified alumni
+- Alumni cards showing: name, current role + company, bio, skill badges
+- Real-time client-side search by name or company
+
+### 💰 Blind Bidding System
+- Place bids for "Alumni of the Day" without seeing competitors' bids
+- Increase your own bid at any time
+- Monthly win limits (3 per month; 4 if event attended)
+- Automatic eligibility enforcement
+
+### ⏰ Automated Daily Winner Selection
+- Midnight cron job selects the highest bidder for the next day
+- Email notification sent to winner
+- Transaction-safe bid status updates (active → won/lost)
+
+### 🔑 Granular API Key Access
+- Issue scoped API keys (e.g. `read:analytics`, `read:alumni`)
+- 403 on missing/insufficient scope
+- Usage timestamps logged per endpoint in `api_usage_logs`
+
+### 📚 API Documentation
+- Swagger UI at `http://localhost:3000/api-docs`
+
+---
+
+## API Overview
+
+| Group | Base Path | Auth |
+|-------|-----------|------|
+| Auth | `/api/auth` | Public |
+| Profile | `/api/profile` | JWT |
+| Bidding | `/api/bidding` | JWT |
+| Analytics | `/api/analytics` | JWT / API Key |
+| Alumni Directory | `/api/alumni` | JWT |
+
+Full endpoint docs available at `/api-docs` when the server is running.
+
+---
+
+## Database Schema (3NF)
+
+| Table | Description |
+|-------|-------------|
+| `users` | Core auth and user data |
+| `profiles` | Bio, LinkedIn, profile image (1:1 users) |
+| `education` | Degree history (1:N users) |
+| `experience` | Employment history (1:N users) |
+| `skills` | Skill tags for analytics (1:N users) |
+| `donations` | Alumni donations (1:N users) |
+| `bids` | Blind bidding records (1:N users) |
+| `daily_winners` | Alumni of the Day winners |
+| `events` | University event records |
+| `event_attendance` | User-event attendance (M:N) |
+| `api_keys` | Scoped API keys (1:N users) |
+| `api_usage_logs` | Per-request usage tracking |
+| `email_verification_tokens` | Secure one-time tokens |
+| `sessions` | Express session store |
+
+---
 
 ## Troubleshooting
 
-### Database Connection Issues
-- Verify MySQL is running
-- Check database credentials in `.env`
-- Ensure database exists: `CREATE DATABASE alumni_platform;`
+**`ER_NO_SUCH_TABLE` on startup**
+> Ensure MySQL is running before starting the backend. The schema auto-creates on connection.
 
-### Email Verification Not Working
-- Configure Gmail app password (not regular password)
-- Enable "Less secure app access" or use App Passwords
-- Check EMAIL_USER and EMAIL_PASSWORD in `.env`
+**Registration fails with domain error**
+> Only `@university.edu` emails are accepted. Update `ALLOWED_DOMAINS` in `CW_Express/.env` to match your domain.
 
-### CORS Errors
-- Add your frontend URL to CORS_ORIGIN in `.env`
-- Example: `CORS_ORIGIN=http://localhost:3000,http://localhost:5173`
+**CORS errors in the browser**
+> Confirm `CORS_ORIGIN=http://localhost:5173` is set in `CW_Express/.env` and restart the backend.
+
+**Charts show no data**
+> The backend seeds mock data on start. If the DB was previously populated from a different schema version, the seed will have re-created all tables with fresh data.
+
+---
 
 ## License
 
-This project is for educational purposes.
-
-## Support
-
-For issues or questions, contact: support@university.edu
+This project is for educational purposes (University Coursework).
