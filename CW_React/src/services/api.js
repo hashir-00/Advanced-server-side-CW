@@ -65,7 +65,16 @@ export const analyticsService = {
 };
 
 export const alumniService = {
-  getDirectory: () => api.get('/alumni/directory')
+  getDirectory: (params) => api.get('/alumni/directory', { params }),
+  getFilters: () => api.get('/alumni/filters')
+};
+
+export const securityService = {
+  getMyKeys: () => api.get('/security/keys'),
+  createKey: (name, scopes) => api.post('/security/keys', { name, scopes }),
+  revokeKey: (keyId) => api.delete(`/security/keys/${keyId}`),
+  getUsageLogs: (keyId) => api.get('/security/usage', { params: keyId ? { keyId } : {} }),
+  getAllUsageLogs: () => api.get('/security/usage/all')
 };
 
 export default api;

@@ -13,10 +13,10 @@ const initDB = async (retries = 5, delay = 5000) => {
       console.log("✓ Database connected successfully");
 
       try {
-        // const schemaPath = path.join(__dirname, '../database/schema.sql');
-        // const schemaStr = fs.readFileSync(schemaPath, 'utf8');
+        const schemaPath = path.join(__dirname, '../database/schema.sql');
+        const schemaStr = fs.readFileSync(schemaPath, 'utf8');
         console.log("⏳ Running schema and seeding mock data...");
-        // await connection.query(schemaStr);
+        await connection.query(schemaStr);
         console.log("✓ Database tables verified and mock data seeded");
       } catch (schemaErr) {
         console.error("✗ Error executing schema:", schemaErr.message);

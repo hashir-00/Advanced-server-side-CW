@@ -1,113 +1,167 @@
-import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Briefcase } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { alumniService } from '../services/api';
+import { Users, Search, Filter, ExternalLink, Briefcase, GraduationCap, Globe } from 'lucide-react';
 import './AlumniDirectory.css';
 
 const AlumniDirectory = () => {
   const [alumni, setAlumni] = useState([]);
+  const [filters, setFilters] = useState({ programmes: [], graduationYears: [], industries: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [search, setSearch] = useState('');
+  const [programme, setProgramme] = useState('');
+  const [graduationYear, setGraduationYear] = useState('');
+  const [industry, setIndustry] = useState('');
 
   useEffect(() => {
-    const fetchAlumni = async () => {
-      try {
-        const res = await alumniService.getDirectory();
-        setAlumni(res.data.data);
-      } catch (err) {
-        setError(err.response?.data?.message || 'Failed to fetch alumni directory');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAlumni();
+    alumniService.getFilters()
+      .then(res => setFilters(res.data.data))
+      .catch(() => {});
   }, []);
 
-  const filteredAlumni = alumni.filter(a => {
-    const term = searchTerm.toLowerCase();
-    const fullName = `${a.first_name} ${a.last_name}`.toLowerCase();
-    const company = a.currentExperience?.company?.toLowerCase() || '';
-    return fullName.includes(term) || company.includes(term);
-  });
+  const fetchAlumni = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const params = {};
+      if (search) params.search = search;
+      if (programme) params.programme = programme;
+      if (graduationYear) params.graduation_year = graduationYear;
+      if (industry) params.industry = industry;
+      const res = await alumniService.getDirectory(params);
+      setAlumni(res.data.data);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to load alumni directory');
+    } finally {
+      setLoading(false);
+    }
+  }, [search, programme, graduationYear, industry]);
 
-  if (loading) {
-    return (
-      <div className="loading-state">
-        <div className="spinner"></div>
-        <p>Loading Alumni Directory...</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const debounce = setTimeout(fetchAlumni, 300);
+    return () => clearTimeout(debounce);
+  }, [fetchAlumni]);
 
-  if (error) {
-    return (
-      <div className="loading-state">
-        <p style={{ color: 'var(--danger-color)' }}>{error}</p>
-      </div>
-    );
-  }
+  const handleReset = () => {
+    setSearch('');
+    setProgramme('');
+    setGraduationYear('');
+    setIndustry('');
+  };
 
   return (
-    <div className="directory-container">
-      <header className="directory-header">
-        <h1>Alumni Directory</h1>
-        
-        <div className="search-bar">
-          <Search size={20} className="search-icon" />
-          <input 
-            type="text" 
-            placeholder="Search by name or company..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+    <div className="alumni-container">
+      <header className="alumni-header">
+        <div>
+          <h1><Users size={26} /> Alumni Directory</h1>
+          <p className="alumni-subtitle">{loading ? 'Loading...' : `${alumni.length} alumni found`}</p>
         </div>
       </header>
 
-      <div className="alumni-grid">
-        {filteredAlumni.map(person => (
-          <div key={person.user_id} className="alumni-card">
-            <div className="alumni-card-header">
-              <div className="alumni-avatar">
-                {person.profile_image_path ? (
-                  <img src={person.profile_image_path} alt={person.first_name} />
-                ) : (
-                  <span>{person.first_name[0]}{person.last_name[0]}</span>
-                )}
-              </div>
-              <div className="alumni-info">
-                <h3>{person.first_name} {person.last_name}</h3>
-                {person.currentExperience ? (
-                  <p className="job-title"><Briefcase size={14}/> {person.currentExperience.position} at {person.currentExperience.company}</p>
-                ) : (
-                  <p className="job-title">Available for opportunities</p>
-                )}
-              </div>
-            </div>
+      <div className="filter-bar">
+        <div className="search-box">
+          <Search size={16} className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search name, company, programme..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="search-input"
+          />
+        </div>
 
-            <div className="alumni-bio">
-              <p>{person.bio || 'This alumni hasn\'t written a bio yet.'}</p>
-            </div>
+        <div className="filter-controls">
+          <Filter size={16} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
 
-            {person.skills && person.skills.length > 0 && (
-              <div className="alumni-skills">
-                {person.skills.slice(0, 4).map((skill, index) => (
-                  <span key={index} className="skill-badge">{skill}</span>
-                ))}
-                {person.skills.length > 4 && <span className="skill-badge more">+{person.skills.length - 4}</span>}
-              </div>
-            )}
-            
-            <div className="alumni-card-footer">
-              <button className="btn btn-outline" style={{width: '100%', padding: '8px'}}>View Profile</button>
-            </div>
-          </div>
-        ))}
-        {filteredAlumni.length === 0 && (
-          <div className="no-results">
-            <p>No alumni found matching your search.</p>
-          </div>
-        )}
+          <select className="filter-select" value={programme} onChange={e => setProgramme(e.target.value)}>
+            <option value="">All Programmes</option>
+            {filters.programmes.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+
+          <select className="filter-select" value={graduationYear} onChange={e => setGraduationYear(e.target.value)}>
+            <option value="">All Graduation Years</option>
+            {filters.graduationYears.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+
+          <select className="filter-select" value={industry} onChange={e => setIndustry(e.target.value)}>
+            <option value="">All Industries</option>
+            {filters.industries.map(i => <option key={i} value={i}>{i}</option>)}
+          </select>
+
+          {(search || programme || graduationYear || industry) && (
+            <button className="btn-reset" onClick={handleReset}>✕ Clear</button>
+          )}
+        </div>
       </div>
+
+      {error && <div className="alumni-error">{error}</div>}
+
+      {loading ? (
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Loading alumni...</p>
+        </div>
+      ) : alumni.length === 0 ? (
+        <div className="empty-state">
+          <Users size={48} opacity={0.3} />
+          <p>No alumni found matching your filters.</p>
+          <button className="btn-reset" onClick={handleReset}>Clear Filters</button>
+        </div>
+      ) : (
+        <div className="alumni-grid">
+          {alumni.map(alumnus => (
+            <div key={alumnus.user_id} className="alumni-card">
+              <div className="card-top">
+                <div className="alumni-avatar">
+                  {alumnus.first_name[0]}{alumnus.last_name[0]}
+                </div>
+                <div className="alumni-id-info">
+                  <h3>{alumnus.first_name} {alumnus.last_name}</h3>
+                  {alumnus.currentExperience && (
+                    <p className="alumni-role">
+                      <Briefcase size={13} /> {alumnus.currentExperience.position} · {alumnus.currentExperience.company}
+                    </p>
+                  )}
+                </div>
+                {alumnus.linkedin_url && (
+                  <a href={alumnus.linkedin_url} target="_blank" rel="noreferrer" className="linkedin-btn" title="LinkedIn">
+                    <ExternalLink size={15} />
+                  </a>
+                )}
+              </div>
+
+              <div className="card-meta">
+                {alumnus.programme && (
+                  <span className="meta-badge programme">
+                    <GraduationCap size={12} /> {alumnus.programme}
+                  </span>
+                )}
+                {alumnus.graduationYear && (
+                  <span className="meta-badge year">Class of {alumnus.graduationYear}</span>
+                )}
+                {alumnus.industry && (
+                  <span className="meta-badge industry">
+                    <Globe size={12} /> {alumnus.industry}
+                  </span>
+                )}
+              </div>
+
+              {alumnus.bio && <p className="alumni-bio">{alumnus.bio}</p>}
+
+              {alumnus.skills?.length > 0 && (
+                <div className="skill-tags">
+                  {alumnus.skills.slice(0, 4).map(skill => (
+                    <span key={skill} className="skill-tag">{skill}</span>
+                  ))}
+                  {alumnus.skills.length > 4 && (
+                    <span className="skill-tag more">+{alumnus.skills.length - 4}</span>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

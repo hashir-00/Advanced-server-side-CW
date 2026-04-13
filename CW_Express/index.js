@@ -48,6 +48,7 @@ dbPool.ready.then(() => {
   const biddingRoutes = require('./routes/bidding');
   const analyticsRoutes = require('./routes/analytics');
   const alumniRoutes = require('./routes/alumni');
+  const securityRoutes = require('./routes/security');
   const v1Routes = require('./router');
 
   app.use('/api/auth', authRoutes);
@@ -55,6 +56,7 @@ dbPool.ready.then(() => {
   app.use('/api/bidding', biddingRoutes);
   app.use('/api/analytics', analyticsRoutes);
   app.use('/api/alumni', alumniRoutes);
+  app.use('/api/security', securityRoutes);
   app.use('/api/v1', v1Routes);
 
   app.get('/', (req, res) => {

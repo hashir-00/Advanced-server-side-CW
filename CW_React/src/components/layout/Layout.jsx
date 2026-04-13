@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, BarChart3, User, Gavel, Menu, LogOut, Bell } from 'lucide-react';
+import { LayoutDashboard, Users, BarChart3, User, Gavel, Shield, Menu, LogOut, Bell } from 'lucide-react';
 import { authService } from '../../services/api';
 import './Layout.css';
 
@@ -16,6 +16,15 @@ const Layout = () => {
     navigate('/login');
   };
 
+  const navLinks = [
+    { to: '/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
+    { to: '/analytics', icon: <BarChart3 size={20} />, label: 'Analytics' },
+    { to: '/alumni', icon: <Users size={20} />, label: 'Alumni Directory' },
+    { to: '/profile', icon: <User size={20} />, label: 'My Profile' },
+    { to: '/bidding', icon: <Gavel size={20} />, label: 'Bidding' },
+    { to: '/security', icon: <Shield size={20} />, label: 'API Security' }
+  ];
+
   return (
     <div className="layout-container">
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
@@ -26,26 +35,17 @@ const Layout = () => {
           </div>
         </div>
         <nav className="sidebar-nav">
-          <NavLink to="/dashboard" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'} onClick={() => setSidebarOpen(false)}>
-            <LayoutDashboard size={20} />
-            <span>Dashboard</span>
-          </NavLink>
-          <NavLink to="/analytics" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'} onClick={() => setSidebarOpen(false)}>
-            <BarChart3 size={20} />
-            <span>Analytics</span>
-          </NavLink>
-          <NavLink to="/alumni" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'} onClick={() => setSidebarOpen(false)}>
-            <Users size={20} />
-            <span>Alumni Directory</span>
-          </NavLink>
-          <NavLink to="/profile" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'} onClick={() => setSidebarOpen(false)}>
-            <User size={20} />
-            <span>My Profile</span>
-          </NavLink>
-          <NavLink to="/bidding" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'} onClick={() => setSidebarOpen(false)}>
-            <Gavel size={20} />
-            <span>Bidding</span>
-          </NavLink>
+          {navLinks.map(link => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}
+              onClick={() => setSidebarOpen(false)}
+            >
+              {link.icon}
+              <span>{link.label}</span>
+            </NavLink>
+          ))}
         </nav>
       </aside>
 
@@ -57,9 +57,7 @@ const Layout = () => {
             </button>
           </div>
           <div className="topbar-right">
-            <button className="icon-btn">
-              <Bell size={20} />
-            </button>
+            <button className="icon-btn"><Bell size={20} /></button>
             <div className="user-profile">
               <div className="avatar">{initials}</div>
               <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{user.firstName || 'User'}</span>

@@ -6,6 +6,7 @@ import Analytics from './pages/Analytics';
 import AlumniDirectory from './pages/AlumniDirectory';
 import Profile from './pages/Profile';
 import Bidding from './pages/Bidding';
+import Security from './pages/Security';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import VerifyEmail from './pages/auth/VerifyEmail';
@@ -29,6 +30,7 @@ function App() {
             <Route path="/alumni" element={<AlumniDirectory />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/bidding" element={<Bidding />} />
+            <Route path="/security" element={<Security />} />
           </Route>
         </Routes>
       </div>
